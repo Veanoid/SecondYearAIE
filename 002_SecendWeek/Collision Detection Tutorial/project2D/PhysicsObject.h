@@ -1,6 +1,6 @@
 #pragma once
 #include<glm\ext.hpp>
-
+#define SHAPE_COUNT 2
 enum ShapeType
 {
 	PLANE = 0,
@@ -18,6 +18,8 @@ public:
 	virtual void debug() = 0;
 	virtual void makeGizmo() = 0;
 	virtual void resetPosition() {};
+
+	ShapeType getShapeID() { return m_shapeID; }
 protected:
 	ShapeType m_shapeID;
 };

@@ -64,8 +64,9 @@ void PhysicsScene::update(float dt)
 			pActor->fixedUpdate(m_gravity, m_timeStep);
 		}
 		accumulatedTime -= m_timeStep;
+		checkForCollision();
 		// check for collisions (ideally you'd want to have some sort of scene managment in place)
-		for (auto pActor : m_actors)
+	/*	for (auto pActor : m_actors)
 		{
 			for (auto pOther : m_actors)
 			{
@@ -89,7 +90,8 @@ void PhysicsScene::update(float dt)
 				}
 			}
 		}
-	dirty.clear();
+	dirty.clear();*/
+
 	}
 	
 }
@@ -112,6 +114,29 @@ static fn collisionFuntionArray[] =
 
 void PhysicsScene::checkForCollision()
 {
+	int actorCount = m_actors.size();
+
+	//need to check for collision against all objects except this one.
+	for (int outer = 0; outer < actorCount; outer++)
+	{
+		for (int inner = outer + 1; + inner < actorCount; inner++)
+		{
+			PhysicsObject* object1 = m_actors[outer];
+			PhysicsObject* object2 = m_actors[inner];
+			int shapeId1 = object1->getShapeID();
+			int shapeId2 = object2->getShapeID();
+
+			//uising function pointers
+			int functionIdx = (shapeId1 * SHAPE_COUNT) + shapeId2;
+			fn collisionFunctionPtr = collisionFuntionArray[functionIdx];
+			if (collisionFunctionPtr != nullptr)
+			{
+				//did a collision occur?
+				collisionFunctionPtr(object1, object2);
+
+			}
+		}
+	}
 }
 
 bool PhysicsScene::plane2Plane(PhysicsObject * a, PhysicsObject * b)
@@ -146,6 +171,7 @@ bool PhysicsScene::sphere2Plane(PhysicsObject * a, PhysicsObject * b)
 		if (intersection > 0)
 		{
 			//set sphere velocity to zero here
+			plane->resolveCollision(sphere);
 			return true;
 		}
 	}
@@ -161,22 +187,13 @@ bool PhysicsScene::sphere2Sphere(PhysicsObject * a, PhysicsObject * b)
 	//if we are successful then test for collision
 	if (sphere1 != nullptr && sphere2 != nullptr)
 	{
-		//this is where the collision detection happens
-		//you need code which sets the velocity of the two sphere to zero
-		//if they are overlapping
-		//get distance between 2 spheres
-		//if distance is less than the combind radius of
-		//both sphere, then a collision occurred so set the 
-		// velocity of both sphere to 0 (we'll add collision resolution later)
-	
 		float distant = glm::length(sphere1->getPosition() - sphere2->getPosition());
 		if (distant < sphere1->getRadius() + sphere2->getRadius())
 		{
-			sphere1->setVelocity(glm::vec2(0,0));
-			sphere2->setVelocity(glm::vec2(0,0));
+			sphere1->resolveCollision(sphere2);
+			//sphere2->setVelocity(glm::vec2(0,0));
+			
 		}
-
-
 	}
 	return false;
 }
