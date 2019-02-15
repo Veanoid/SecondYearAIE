@@ -5,6 +5,7 @@
 #include <iostream>
 #include "Sphere.h"
 #include "Plane.h"
+#include "Square.h"
 
 PhysicsScene::PhysicsScene() : m_timeStep(0.01f), m_gravity(glm::vec2(0,0))
 {
@@ -108,8 +109,9 @@ typedef bool(*fn)(PhysicsObject* a, PhysicsObject* b);
 
 static fn collisionFuntionArray[] =
 {
-	PhysicsScene::plane2Plane, PhysicsScene::plane2Sphere,
-	PhysicsScene::sphere2Plane, PhysicsScene::sphere2Sphere,
+	PhysicsScene::plane2Plane, PhysicsScene::plane2Sphere, PhysicsScene::plane2Box,
+	PhysicsScene::sphere2Plane, PhysicsScene::sphere2Sphere, PhysicsScene::sphere2Box,
+	PhysicsScene::box2Plane, PhysicsScene::box2Sphere, PhysicsScene::box2Box
 };
 
 void PhysicsScene::checkForCollision()
@@ -145,6 +147,11 @@ bool PhysicsScene::plane2Plane(PhysicsObject * a, PhysicsObject * b)
 }
 
 bool PhysicsScene::plane2Sphere(PhysicsObject * a, PhysicsObject * b)
+{
+	return sphere2Plane(b, a);
+}
+
+bool PhysicsScene::plane2Box(PhysicsObject *, PhysicsObject *)
 {
 	return false;
 }
@@ -196,6 +203,44 @@ bool PhysicsScene::sphere2Sphere(PhysicsObject * a, PhysicsObject * b)
 		}
 	}
 	return false;
+}
+
+bool PhysicsScene::sphere2Box(PhysicsObject *a, PhysicsObject *b)
+{
+	Sphere *sphere1 = dynamic_cast<Sphere*>(a);
+	Square *square1 = dynamic_cast<Square*>(b);
+	glm::vec2 point = glm::clamp(sphere1->getPosition(), square1->getMin(), square1->getMax());
+	glm::vec2 distant = point - sphere1->getPosition();
+	if (glm::length(distant) * glm::length(distant) <= sphere1->getRadius()* sphere1->getRadius());
+	{
+		sphere1->resolveCollision(square1);
+	}
+
+
+	return false;
+}
+
+bool PhysicsScene::box2Plane(PhysicsObject *a, PhysicsObject *b)
+{
+	return false;
+}
+
+bool PhysicsScene::box2Sphere(PhysicsObject *a, PhysicsObject *b)
+{
+	return sphere2Box(b, a);
+}
+
+bool PhysicsScene::box2Box(PhysicsObject *a, PhysicsObject *b)
+{
+	Square *square1 = dynamic_cast<Square*>(a);
+	Square *square2 = dynamic_cast<Square*>(b);
+
+	bool noOverlap = square1->getMax().x < square2->getMin().x || square2->getMax().x < square1->getMin().x || square1->getMax().y < square2->getMin().y || square2->getMax().y < square1->getMin().y;
+	if (!noOverlap)
+	{
+		square1->resolveCollision(square2);
+	}
+	return !noOverlap;
 }
 
 

@@ -15,7 +15,6 @@ public:
 	void applyForce(glm::vec2 force);
 	void applyForceToActor(Rigidbody* actor2, glm::vec2 force);
 
-	virtual bool checkCollision(PhysicsObject* pOther) = 0;
 
 	glm::vec2 getPosition() { return m_position; }
 	float getRotation() { return m_rotation; }
@@ -23,6 +22,7 @@ public:
 	float getMass() { return m_mass; }
 	void setVelocity(glm::vec2 velocity) { m_velocity = velocity; }
 	void resolveCollision(Rigidbody* actor2);
+	float getElasitcity() { return m_elasticity; }
 
 protected:
 	glm::vec2 m_position;
@@ -30,7 +30,8 @@ protected:
 	float m_mass;
 	float m_rotation;
 
-	float m_linearDrag;
+	float m_linearDrag = 0;
 	float m_angularDrag;
+	float m_elasticity = 1;
 };
 

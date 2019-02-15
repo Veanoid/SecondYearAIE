@@ -1,11 +1,13 @@
 #pragma once
 #include<glm\ext.hpp>
-#define SHAPE_COUNT 2
+//#define SHAPE_COUNT 3
 enum ShapeType
 {
 	PLANE = 0,
 	SPHERE,
-	BOX
+	BOX,
+
+	SHAPE_COUNT
 };
 
 class PhysicsObject
