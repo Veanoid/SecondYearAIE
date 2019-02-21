@@ -46,6 +46,20 @@ void Rigidbody::applyForceToActor(Rigidbody * actor2, glm::vec2 force)
 	applyForce(-force);
 }
 
+void Rigidbody::applyRestitution(glm::vec2 collisionNormal, float penatration, Rigidbody * Actor2)
+{
+	if (Actor2)
+	{
+		glm::vec2 move = collisionNormal * penatration / 2.0f;
+		Actor2->SetPosition(move + Actor2->getPosition());
+		SetPosition(getPosition() - move);
+	}
+	else
+	{
+		this->SetPosition(collisionNormal * penatration + this->getPosition());
+	}
+}
+
 void Rigidbody::resolveCollision(Rigidbody * actor2)
 {
 	glm::vec2 normal = glm::normalize(actor2->getPosition() - m_position);

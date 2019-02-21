@@ -151,9 +151,9 @@ bool PhysicsScene::plane2Sphere(PhysicsObject * a, PhysicsObject * b)
 	return sphere2Plane(b, a);
 }
 
-bool PhysicsScene::plane2Box(PhysicsObject *, PhysicsObject *)
+bool PhysicsScene::plane2Box(PhysicsObject * a, PhysicsObject * b)
 {
-	return false;
+	return box2Plane(b, a);
 }
 
 bool PhysicsScene::sphere2Plane(PhysicsObject * a, PhysicsObject * b)
@@ -177,7 +177,9 @@ bool PhysicsScene::sphere2Plane(PhysicsObject * a, PhysicsObject * b)
 		float intersection = sphere->getRadius() - sphereToPlane;
 		if (intersection > 0)
 		{
+			
 			//set sphere velocity to zero here
+			sphere->applyRestitution(collisionNormal, intersection);
 			plane->resolveCollision(sphere);
 			return true;
 		}
@@ -194,9 +196,12 @@ bool PhysicsScene::sphere2Sphere(PhysicsObject * a, PhysicsObject * b)
 	//if we are successful then test for collision
 	if (sphere1 != nullptr && sphere2 != nullptr)
 	{
-		float distant = glm::length(sphere1->getPosition() - sphere2->getPosition());
+		glm::vec2 collisionNormal = sphere1->getPosition() - sphere2->getPosition();
+		float distant = glm::length(collisionNormal);
 		if (distant < sphere1->getRadius() + sphere2->getRadius())
 		{
+			collisionNormal = glm::normalize(collisionNormal);
+			sphere1->applyRestitution(collisionNormal, distant - (sphere1->getRadius() + sphere2->getRadius()), sphere2);
 			sphere1->resolveCollision(sphere2);
 			//sphere2->setVelocity(glm::vec2(0,0));
 			
@@ -209,11 +214,14 @@ bool PhysicsScene::sphere2Box(PhysicsObject *a, PhysicsObject *b)
 {
 	Sphere *sphere1 = dynamic_cast<Sphere*>(a);
 	Square *square1 = dynamic_cast<Square*>(b);
-	glm::vec2 point = glm::clamp(sphere1->getPosition(), square1->getMin(), square1->getMax());
-	glm::vec2 distant = point - sphere1->getPosition();
-	if (glm::length(distant) * glm::length(distant) <= sphere1->getRadius()* sphere1->getRadius());
+	glm::vec2 point = glm::clamp(sphere1->getPosition(), square1->getPosition() + square1->getMin(), square1->getPosition() + square1->getMax());
+	glm::vec2 distant = sphere1->getPosition() - point;
+	if (glm::length(distant) <= sphere1->getRadius())
 	{
+	
 		sphere1->resolveCollision(square1);
+
+		square1->InvertFilled();
 	}
 
 
@@ -222,6 +230,45 @@ bool PhysicsScene::sphere2Box(PhysicsObject *a, PhysicsObject *b)
 
 bool PhysicsScene::box2Plane(PhysicsObject *a, PhysicsObject *b)
 {
+
+	Square *square = dynamic_cast<Square*>(a);
+	Plane *plane = dynamic_cast<Plane*>(b);
+	if (square == nullptr || plane == nullptr)
+		return false;
+
+	glm::vec2 collisionNormal = plane->getNormal();
+	std::vector<glm::vec2> corners = square->corners();
+	float CornersToLine[4];
+	for (int i = 0; i < corners.size(); i++)
+	{
+		//if we are successful then test for collision
+		float SquaretoPlan = glm::dot(square->getPosition() + corners[i], plane->getNormal()) - plane->getDistance();
+
+		CornersToLine[i] = SquaretoPlan;
+	}
+
+	bool BRCube = CornersToLine[0] < 0 && CornersToLine[2] > 0;
+	bool BLCube = CornersToLine[1] > 0 && CornersToLine[3] < 0;
+
+	if (BRCube || BLCube)
+	{
+		float tration;
+		if (BRCube)
+		{
+			tration = glm::min(abs(CornersToLine[0]), abs(CornersToLine[2]));
+		}
+		else
+		{
+
+			tration = glm::min(abs(CornersToLine[1]), abs(CornersToLine[3]));
+		}
+
+		plane->resolveCollision(square);
+		square->InvertFilled();
+		return true;
+		
+	}
+
 	return false;
 }
 
@@ -239,6 +286,9 @@ bool PhysicsScene::box2Box(PhysicsObject *a, PhysicsObject *b)
 	if (!noOverlap)
 	{
 		square1->resolveCollision(square2);
+
+		square1->InvertFilled();
+		square2->InvertFilled();
 	}
 	return !noOverlap;
 }
