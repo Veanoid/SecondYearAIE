@@ -22,7 +22,7 @@ public:
 	glm::vec2 getVelocity() { return m_velocity; }
 	float getMass() { return m_mass; }
 	void setVelocity(glm::vec2 velocity) { m_velocity = velocity; }
-	void resolveCollision(Rigidbody* actor2);
+	void resolveCollision(Rigidbody* actor2, glm::vec2 collisionNormal);
 	float getElasitcity() { return m_elasticity; }
 
 	void InvertFilled() { m_bIsFilled = !m_bIsFilled; };

@@ -60,9 +60,9 @@ void Rigidbody::applyRestitution(glm::vec2 collisionNormal, float penatration, R
 	}
 }
 
-void Rigidbody::resolveCollision(Rigidbody * actor2)
+void Rigidbody::resolveCollision(Rigidbody * actor2, glm::vec2 collisionNormal)
 {
-	glm::vec2 normal = glm::normalize(actor2->getPosition() - m_position);
+	glm::vec2 normal = glm::normalize(collisionNormal);
 	glm::vec2 relativeVelocity = actor2->getVelocity() - m_velocity;
 
 	float elasticity = (m_elasticity + actor2->getElasitcity()) / 2.0f;

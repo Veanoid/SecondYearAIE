@@ -165,8 +165,7 @@ bool PhysicsScene::sphere2Plane(PhysicsObject * a, PhysicsObject * b)
 	if (sphere != nullptr && plane != nullptr)
 	{
 		glm::vec2 collisionNormal = plane->getNormal();
-		float sphereToPlane = glm::dot(
-			sphere->getPosition(), plane->getNormal()) - plane->getDistance();
+		float sphereToPlane = glm::dot(sphere->getPosition(), plane->getNormal()) - plane->getDistance();
 
 		//if we are behind then we flip normal
 		if (sphereToPlane < 0)
@@ -202,7 +201,7 @@ bool PhysicsScene::sphere2Sphere(PhysicsObject * a, PhysicsObject * b)
 		{
 			collisionNormal = glm::normalize(collisionNormal);
 			sphere1->applyRestitution(collisionNormal, distant - (sphere1->getRadius() + sphere2->getRadius()), sphere2);
-			sphere1->resolveCollision(sphere2);
+			sphere1->resolveCollision(sphere2, collisionNormal);
 			//sphere2->setVelocity(glm::vec2(0,0));
 			
 		}
@@ -218,9 +217,10 @@ bool PhysicsScene::sphere2Box(PhysicsObject *a, PhysicsObject *b)
 	glm::vec2 distant = sphere1->getPosition() - point;
 	if (glm::length(distant) <= sphere1->getRadius())
 	{
-	
-		sphere1->resolveCollision(square1);
-
+		glm::vec2 collisionNormal = glm::normalize(distant);
+		sphere1->applyRestitution(collisionNormal, glm::length(distant) - sphere1->getRadius(), square1);
+		sphere1->resolveCollision(square1, collisionNormal);
+		
 		square1->InvertFilled();
 	}
 
@@ -259,10 +259,16 @@ bool PhysicsScene::box2Plane(PhysicsObject *a, PhysicsObject *b)
 		}
 		else
 		{
-
 			tration = glm::min(abs(CornersToLine[1]), abs(CornersToLine[3]));
 		}
 
+		float behind = glm::dot(square->getPosition(), plane->getNormal()) - plane->getDistance();
+		if (behind < 0)
+		{
+			collisionNormal = -collisionNormal;
+		}
+
+		square->applyRestitution(collisionNormal, tration);
 		plane->resolveCollision(square);
 		square->InvertFilled();
 		return true;
@@ -279,18 +285,49 @@ bool PhysicsScene::box2Sphere(PhysicsObject *a, PhysicsObject *b)
 
 bool PhysicsScene::box2Box(PhysicsObject *a, PhysicsObject *b)
 {
+
+	float pen;
+	glm::vec2 ncoll;
+
 	Square *square1 = dynamic_cast<Square*>(a);
 	Square *square2 = dynamic_cast<Square*>(b);
 
-	bool noOverlap = square1->getMax().x < square2->getMin().x || square2->getMax().x < square1->getMin().x || square1->getMax().y < square2->getMin().y || square2->getMax().y < square1->getMin().y;
-	if (!noOverlap)
-	{
-		square1->resolveCollision(square2);
+	glm::vec2 pos1 = square1->getPosition();
+	glm::vec2 pos2 = square2->getPosition();
 
-		square1->InvertFilled();
-		square2->InvertFilled();
+	glm::vec2 faces[4]
+	{
+		glm::vec2(-1,0),	//left
+		glm::vec2(1,0),		// right
+		glm::vec2(0,-1),	// bottom
+		glm::vec2(0,1)		// top
+	};
+	float distances[4]
+	{
+		(square2->getMax().x + pos2.x) - (square1->getMin().x + pos1.x),
+		(square1->getMax().x + pos1.x) - (square2->getMin().x + pos2.x) ,
+		(square2->getMax().y + pos2.y) - (square1->getMin().y + pos1.y),
+		(square1->getMax().y + pos1.y) - (square2->getMin().y + pos2.y)
+
+	};
+
+
+	for (int i = 0; i < 4; i++)
+	{
+		if (distances[i] < 0.0f)
+			return false;
+
+		if (i == 0 || (distances[i] < pen))
+		{
+			ncoll = faces[i];
+			pen = distances[i];
+		}
 	}
-	return !noOverlap;
+	square1->applyRestitution(ncoll, pen, square2);
+	square1->resolveCollision(square2, ncoll);
+	square1->InvertFilled();
+	square2->InvertFilled();
+	return true;
 }
 
 

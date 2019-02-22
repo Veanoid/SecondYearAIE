@@ -61,13 +61,15 @@ bool Application2D::startup() {
 	Plane* wall2 = new Plane(glm::vec2(1, 0), -98);
 	m_physicsScene->addActor(wall2);
 
-	Plane* slop = new Plane(glm::normalize( glm::vec2(0.5f, 1)), -30);
+	Plane* slop = new Plane(glm::normalize(glm::vec2(0.5f, 1)), -30);
 	m_physicsScene->addActor(slop);
 
 	ball1->applyForceToActor(ball2, glm::vec2(2, 0));
 
 	 Square* box1 = new Square(glm::vec2(-5, -5), glm::vec2(5, 5), glm::vec2(60, -10), glm::vec2(0, 0), 8, glm::vec4(1, 0, 1, 1));
 	 m_physicsScene->addActor(box1);
+	 Square* box2 = new Square(glm::vec2(-5, -5), glm::vec2(5, 5), glm::vec2(-60, 10), glm::vec2(0, 0), 8, glm::vec4(1, 0, 1, 1));
+	 m_physicsScene->addActor(box2);
    
 	ball1->applyForce(glm::vec2(300, 0));
 	ball2->applyForce(glm::vec2(-150, 0));
