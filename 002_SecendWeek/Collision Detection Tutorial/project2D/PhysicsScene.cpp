@@ -200,7 +200,7 @@ bool PhysicsScene::sphere2Sphere(PhysicsObject * a, PhysicsObject * b)
 		if (distant < sphere1->getRadius() + sphere2->getRadius())
 		{
 			collisionNormal = glm::normalize(collisionNormal);
-			sphere1->applyRestitution(collisionNormal, distant - (sphere1->getRadius() + sphere2->getRadius()), sphere2);
+			sphere1->applyRestitution(collisionNormal, distant - (sphere2->getRadius() + sphere1->getRadius()), sphere2);
 			sphere1->resolveCollision(sphere2, collisionNormal);
 			//sphere2->setVelocity(glm::vec2(0,0));
 			
@@ -218,6 +218,11 @@ bool PhysicsScene::sphere2Box(PhysicsObject *a, PhysicsObject *b)
 	if (glm::length(distant) <= sphere1->getRadius())
 	{
 		glm::vec2 collisionNormal = glm::normalize(distant);
+
+		if (glm::length(distant) == 0)
+		{
+			collisionNormal = glm::normalize(square1->getPosition() - sphere1->getPosition());
+		}
 		sphere1->applyRestitution(collisionNormal, glm::length(distant) - sphere1->getRadius(), square1);
 		sphere1->resolveCollision(square1, collisionNormal);
 		
@@ -291,11 +296,22 @@ bool PhysicsScene::box2Box(PhysicsObject *a, PhysicsObject *b)
 
 	Square *square1 = dynamic_cast<Square*>(a);
 	Square *square2 = dynamic_cast<Square*>(b);
-
+	//if (square1->getStatic())
+	//{		
+	//	Square *temp = square2;
+	//	square2 = square1;
+	//	square1 = temp;
+	//}
+	if (square2->getStatic())
+	{
+		Square *temp = square1;
+		square1 = square2;
+		square2 = temp;
+	}
 	glm::vec2 pos1 = square1->getPosition();
 	glm::vec2 pos2 = square2->getPosition();
 
-	glm::vec2 faces[4]
+	static glm::vec2 faces[4]
 	{
 		glm::vec2(-1,0),	//left
 		glm::vec2(1,0),		// right

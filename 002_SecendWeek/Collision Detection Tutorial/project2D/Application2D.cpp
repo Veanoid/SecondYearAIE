@@ -41,12 +41,12 @@ bool Application2D::startup() {
 	m_physicsScene->setTimeStep(0.01f);
 	
 
-	Sphere* ball1 = new Sphere(glm::vec2(-40, 0), glm::vec2(0, 0), 4.0f, 4, glm::vec4(1, 0, 0, 1));
-	m_physicsScene->addActor(ball1);
-	Sphere* ball2 = new Sphere(glm::vec2(40, 0), glm::vec2(0, 0), 4.0f, 4, glm::vec4(0, 1, 0, 1));
-	m_physicsScene->addActor(ball2);
-	Sphere* ball3 = new Sphere(glm::vec2(40, 20), glm::vec2(0, 0), 4.0f, 4, glm::vec4(0, 1, 1, 1));
-	m_physicsScene->addActor(ball3);
+	 //Sphere* ball1 = new Sphere(glm::vec2(-40, 0), glm::vec2(0, 0), 4.0f, 4, glm::vec4(1, 0, 0, 1));
+	 //m_physicsScene->addActor(ball1);
+	 //Sphere* ball2 = new Sphere(glm::vec2(40, 0), glm::vec2(0, 0), 4.0f, 4, glm::vec4(0, 1, 0, 1));
+	 //m_physicsScene->addActor(ball2);
+	 //Sphere* ball3 = new Sphere(glm::vec2(40, 20), glm::vec2(0, 0), 4.0f, 4, glm::vec4(0, 1, 1, 1));
+	 //m_physicsScene->addActor(ball3);
 
 	Plane* ground1 = new Plane(glm::vec2(0, 1), 55);
 	m_physicsScene->addActor(ground1);
@@ -64,18 +64,26 @@ bool Application2D::startup() {
 	Plane* slop = new Plane(glm::normalize(glm::vec2(0.5f, 1)), -30);
 	m_physicsScene->addActor(slop);
 
-	ball1->applyForceToActor(ball2, glm::vec2(2, 0));
+	// ball1->applyForceToActor(ball2, glm::vec2(2, 0));
 
-	 Square* box1 = new Square(glm::vec2(-5, -5), glm::vec2(5, 5), glm::vec2(60, -10), glm::vec2(0, 0), 8, glm::vec4(1, 0, 1, 1));
+	 Square* box1 = new Square(glm::vec2(-5, -5), glm::vec2(5, 5), glm::vec2(-30, 10), glm::vec2(-50, 0), 8, glm::vec4(1, 0, 1, 1));
 	 m_physicsScene->addActor(box1);
-	 Square* box2 = new Square(glm::vec2(-5, -5), glm::vec2(5, 5), glm::vec2(-60, 10), glm::vec2(0, 0), 8, glm::vec4(1, 0, 1, 1));
-	 m_physicsScene->addActor(box2);
    
-	ball1->applyForce(glm::vec2(300, 0));
-	ball2->applyForce(glm::vec2(-150, 0));
-	ball3->applyForce(glm::vec2(0, -150));
+	 Square* NomoveBox = new Square(glm::vec2(-5, -5), glm::vec2(5, 5), glm::vec2(-10, 10), glm::vec2(0, 0), 8, glm::vec4(0, 0, 1, 1));
+	 NomoveBox->setStatic(true);
+	 m_physicsScene->addActor(NomoveBox);
+	 Sphere* NomoveBall = new Sphere(glm::vec2(-40, 20), glm::vec2(0, 0), 4.0f, 4, glm::vec4(0, 1, 1, 1));
+	 NomoveBall->setStatic(true);
+	 m_physicsScene->addActor(NomoveBall);
+
+	 Square* box2 = new Square(glm::vec2(-5, -5), glm::vec2(5, 5), glm::vec2(-10, 40), glm::vec2(0, -20), 8, glm::vec4(1, 0, 1, 1));
+	 m_physicsScene->addActor(box2);
+	 //ball1->applyForce(glm::vec2(300, 0));
+	 //ball2->applyForce(glm::vec2(-150, 0));
+	 //ball3->applyForce(glm::vec2(0, -150));
 
 	Rocket = new Sphere(glm::vec2(0, -10), glm::vec2(0,0), Rocket_mass, 4, glm::vec4(1,1,1,1));
+	delete Rocket;
 	//m_physicsScene->addActor(Rocket);
 
 

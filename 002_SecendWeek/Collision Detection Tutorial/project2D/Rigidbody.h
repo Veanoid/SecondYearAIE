@@ -27,6 +27,9 @@ public:
 
 	void InvertFilled() { m_bIsFilled = !m_bIsFilled; };
 
+	bool getStatic() { return isStatic; };
+	void setStatic(bool gimmestatic) { isStatic = gimmestatic; }
+
 protected:
 	glm::vec2 m_position;
 	glm::vec2 m_velocity;
@@ -38,5 +41,7 @@ protected:
 	float m_linearDrag = 0;
 	float m_angularDrag;
 	float m_elasticity = 1;
+
+	bool isStatic = false;
 };
 
