@@ -73,7 +73,7 @@ void Rigidbody::applyRestitution(glm::vec2 collisionNormal, float penatration, R
 	// seeing if there is an actor2 and actor is static and actor 2 isn't 
 	else if (Actor2 && this->getStatic() && !Actor2->getStatic())
 	{
-		penatration = -abs(penatration);
+		//penatration = -abs(penatration);
 		Actor2->SetPosition(collisionNormal * penatration + Actor2->getPosition());
 	}
 	if (this && isnan(this->getPosition().x))
