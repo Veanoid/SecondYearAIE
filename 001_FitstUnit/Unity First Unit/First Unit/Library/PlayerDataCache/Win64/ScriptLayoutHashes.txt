@@ -1,8 +1,8 @@
 WindowsStandalone
 PlayerPath?
-C:/Users/s172578/Desktop/First Unit.exe
+C:/Users/s172578/Desktop/Build/First Unit.exe
 SceneListBegin?
-Assets/Scenes/SampleScene.unity
+Assets/_Scenes/00 Starter Scene.unity
 SceneListEnd?
 c422dd62785a6d0afa870fbd111886ce Unity.TextMeshPro.dll:TMPro.TMP_SelectionCaret
 7b803eb2910e9b4cd5e521ae07b9f7d6 Unity.TextMeshPro.dll:TMPro.TMP_Dropdown
