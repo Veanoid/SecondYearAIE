@@ -435,3 +435,5 @@ ASALocalRun/
 healthchecksdb
 
 # End of https://www.gitignore.io/api/c++,windows,visualstudio
+001_FitstUnit/Unity First Unit/First Unit/Temp/
+001_FitstUnit/Unity First Unit/First Unit/Library/
