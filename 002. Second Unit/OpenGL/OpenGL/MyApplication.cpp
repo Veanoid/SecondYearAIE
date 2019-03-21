@@ -54,7 +54,7 @@ bool MyApplication::startup()
 	printf("GL: %i.%i\n", major, minor);
 
 	aie::Gizmos::create(10000, 10000, 10000, 10000);
-	 view = glm::lookAt(vec3(10, 10, 10), vec3(0), vec3(0, 1, 0));
+	 view = glm::lookAt(vec3(20, 20, 20), vec3(0), vec3(0, 1, 0));
 	projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 100.f);
 
 	m_positions[0] = glm::vec3(10, 5, 10);
@@ -113,11 +113,22 @@ void MyApplication::draw()
 
 	float s = glm::cos(glfwGetTime()) * 0.5f + 0.5f;
 
+	//Hip Bone
 	glm::vec3 p = (1.0f - s) * m_hipFrames[0].position + s * m_hipFrames[1].position;
-
 	glm::quat r = glm::slerp(m_hipFrames[0].rotation, m_hipFrames[1].rotation, s);
-
 	m_hipBone = glm::translate(p) * glm::toMat4(r);
+
+	//Knee
+	glm::vec3 w = (1.0f - s) * m_kneeFrames[0].position + s * m_kneeFrames[1].position;
+	glm::quat t = glm::slerp(m_kneeFrames[0].rotation, m_kneeFrames[1].rotation, s);
+	m_kneeBone = glm::translate(w) * glm::toMat4(t);
+	m_kneeBone = m_hipBone * m_kneeBone;
+
+	//Ankle
+	glm::vec3 e = (1.0f - s) * m_ankleFrames[0].position + s * m_ankleFrames[1].position;
+	glm::quat y = glm::slerp(m_ankleFrames[0].rotation, m_ankleFrames[1].rotation, s);
+	m_ankleBone = glm::translate(e) * glm::toMat4(y);
+	m_ankleBone = m_kneeBone * m_ankleBone;
 
 	aie::Gizmos::addTransform(m_hipBone);
 	aie::Gizmos::addAABBFilled(p, glm::vec3(.5f), glm::vec4(1, 0, 0, 1), &m_hipBone);
