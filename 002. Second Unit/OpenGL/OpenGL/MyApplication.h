@@ -6,6 +6,8 @@
 #include "Gizmos.h"
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include "Mesh.h"
+#include "Shader.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -45,5 +47,9 @@ protected:
 	glm::mat4 m_hipBone;
 	glm::mat4 m_kneeBone;
 	glm::mat4 m_ankleBone;
+
+	aie::ShaderProgram m_shader;
+	Mesh m_quadMesh;
+	glm::mat4 m_quadTransform;
 };
 

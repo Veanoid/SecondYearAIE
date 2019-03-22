@@ -9,6 +9,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
+#include "Shader.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -54,8 +55,8 @@ bool MyApplication::startup()
 	printf("GL: %i.%i\n", major, minor);
 
 	aie::Gizmos::create(10000, 10000, 10000, 10000);
-	 view = glm::lookAt(vec3(20, 20, 20), vec3(0), vec3(0, 1, 0));
-	projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 100.f);
+	view = glm::lookAt(vec3(20, 20, 20), vec3(0), vec3(0, 1, 0));
+	projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
 
 	m_positions[0] = glm::vec3(10, 5, 10);
 	m_positions[1] = glm::vec3(-10, 0, -10);
@@ -79,7 +80,51 @@ bool MyApplication::startup()
 
 
 
+
+
+	// load vertex shader from file
+	m_shader.loadShader(aie::eShaderStage::VERTEX, "../OpenGL/simple.vert");
+	//load fragment shader from file
+	m_shader.loadShader(aie::eShaderStage::FRAGMENT, "../OpenGL/simple.frag");
+
+	if (m_shader.link() == false)
+	{
+		printf("Shader Error: %s\n", m_shader.getLastError());
+		return false;
+	}
+
+
+	m_quadTransform =
+	{
+		10,0,0,0,
+		0,10,0,0,
+		0,0,10,0,
+		0,0,0,1
+
+	};
+
+	Mesh::Vertex vertices[8];
+	vertices[0].position = { -0.5f, 0, 0.5f, 1 };
+	vertices[1].position = { 0.5f, 0, 0.5f, 1 };
+	vertices[2].position = { -0.5, 0, -0.5f, 1 };
+	vertices[3].position = { 0.5f, 0, -0.5, 1 };
+
+	vertices[4].position = { -0.5f, 1, 0.5f, 1 };
+	vertices[5].position = { 0.5f, 1, 0.5f, 1 };
+	vertices[6].position = { -0.5, 1, -0.5f, 1 };
+	vertices[7].position = { 0.5f, 1, -0.5, 1 };
+
+	unsigned int indices[36] = { 0, 1, 2, 2, 1, 3,
+								4, 5, 6, 6, 5, 7,
+								0, 1, 4, 4, 5, 1,
+								0, 2, 4, 4, 6, 2,
+								2, 3, 6, 6, 7, 3,
+								1, 3, 5, 5, 7, 3};
+
+	m_quadMesh.initialise(8, vertices, 36, indices);
+
 	return true;
+	
 }
 
 bool MyApplication::update()
@@ -97,6 +142,9 @@ bool MyApplication::update()
 
 void MyApplication::draw()
 {
+
+	
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	aie::Gizmos::clear();
@@ -144,8 +192,16 @@ void MyApplication::draw()
 	aie::Gizmos::addAABBFilled(kneePos, half, pink, &m_kneeBone);
 	aie::Gizmos::addAABBFilled(anklePos, half, pink, &m_ankleBone);
 
+	m_quadMesh.draw();
+
+	m_shader.bind();
+
+	auto pvm = projection * view * m_quadTransform;
+	m_shader.bindUniform("projection", pvm);
 
 	aie::Gizmos::draw(projection * view);
+
+	
 
 }
 
