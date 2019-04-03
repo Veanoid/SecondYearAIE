@@ -54,6 +54,8 @@ bool MyApplication::startup()
 	auto minor = ogl_GetMinorVersion();
 	printf("GL: %i.%i\n", major, minor);
 
+
+	// Camera
 	aie::Gizmos::create(10000, 10000, 10000, 10000);
 	view = glm::lookAt(vec3(20, 20, 20), vec3(0), vec3(0, 1, 0));
 	projection = glm::perspective(glm::pi<float>() * 0.25f, 16 / 9.f, 0.1f, 1000.f);
@@ -79,7 +81,27 @@ bool MyApplication::startup()
 	m_ankleFrames[1].rotation = glm::quat(glm::vec3(0, 0, 0));
 
 
+	
+	m_gridTexture.load("../data/numbered_grid.tga");
 
+	aie::Texture texture2;
+	unsigned char texelData[4] = { 0, 255, 255, 0 };
+	texture2.create(2, 2, aie::Texture::RED, texelData);
+
+
+	// loading in spear
+	if (m_spearMesh.load("../data/soulspear/soulspear.obj", true, true) == false)
+	{
+		printf("SoulSpear Mesh Error!\n");
+		return false;
+	}
+
+	m_spearTransform = {
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	};
 
 
 	// load vertex shader from file
@@ -92,6 +114,19 @@ bool MyApplication::startup()
 		printf("Shader Error: %s\n", m_shader.getLastError());
 		return false;
 	}
+	// loading in bunny
+	if (m_bunnyMesh.load("../data/stanford/Bunny.obj") == false)
+	{
+		printf("Bunny Mesh Error!\n");
+		return false;
+	}
+
+	m_bunnyTransform = {
+		0.5f,0,0,0,
+		0,0.5f,0,0,
+		0,0,0.5f,0,
+		0,0,0,1
+	};
 
 
 	m_quadTransform =
@@ -103,25 +138,35 @@ bool MyApplication::startup()
 
 	};
 
-	Mesh::Vertex vertices[8];
-	vertices[0].position = { -0.5f, 0, 0.5f, 1 };
-	vertices[1].position = { 0.5f, 0, 0.5f, 1 };
-	vertices[2].position = { -0.5, 0, -0.5f, 1 };
-	vertices[3].position = { 0.5f, 0, -0.5, 1 };
+	m_quadMesh.initialiseQuad();
 
-	vertices[4].position = { -0.5f, 1, 0.5f, 1 };
-	vertices[5].position = { 0.5f, 1, 0.5f, 1 };
-	vertices[6].position = { -0.5, 1, -0.5f, 1 };
-	vertices[7].position = { 0.5f, 1, -0.5, 1 };
+	Mesh::Vertex vertices[6];
+	//vertices[0].position = { -0.5f, 0, 0.5f, 1 };
+	//vertices[1].position = { 0.5f, 0, 0.5f, 1 };
+	//vertices[2].position = { -0.5, 0, -0.5f, 1 };
+	//vertices[3].position = { 0.5f, 0, -0.5, 1 };
+	//
+	//vertices[4].position = { -0.5f, 1, 0.5f, 1 };
+	//vertices[5].position = { 0.5f, 1, 0.5f, 1 };
+	//vertices[6].position = { -0.5, 1, -0.5f, 1 };
+	//vertices[7].position = { 0.5f, 1, -0.5, 1 };
+	//
+	//unsigned int indices[36] = { 0, 1, 2, 2, 1, 3,
+	//							4, 5, 6, 6, 5, 7,
+	//							0, 1, 4, 4, 5, 1,
+	//							0, 2, 4, 4, 6, 2,
+	//							2, 3, 6, 6, 7, 3,
+	//							1, 3, 5, 5, 7, 3};
 
-	unsigned int indices[36] = { 0, 1, 2, 2, 1, 3,
-								4, 5, 6, 6, 5, 7,
-								0, 1, 4, 4, 5, 1,
-								0, 2, 4, 4, 6, 2,
-								2, 3, 6, 6, 7, 3,
-								1, 3, 5, 5, 7, 3};
+	//m_quadMesh.initialise(8, vertices, 36, indices);
 
-	m_quadMesh.initialise(8, vertices, 36, indices);
+	
+	
+	m_light.direction = { 0, 1, 0 };
+	m_light.diffuse = { 1, 1, 1 };
+	m_light.specular = { 1, 1, 0 };
+	m_ambientLight = { 0.25f, 0.25f, 0.25f };
+
 
 	return true;
 	
@@ -134,10 +179,14 @@ bool MyApplication::update()
 	
 	glfwSwapBuffers(window);
 	glfwPollEvents();
+
+	// query time since application started
+	float time = glfwGetTime();
+
+	// rotate light
+	m_light.direction = glm::normalize(vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
 	
 	return glfwWindowShouldClose(window) == false && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS;
-
-	
 }
 
 void MyApplication::draw()
@@ -192,16 +241,58 @@ void MyApplication::draw()
 	aie::Gizmos::addAABBFilled(kneePos, half, pink, &m_kneeBone);
 	aie::Gizmos::addAABBFilled(anklePos, half, pink, &m_ankleBone);
 
-	m_quadMesh.draw();
 
-	m_shader.bind();
-
+	// drawing Grid
 	auto pvm = projection * view * m_quadTransform;
 	m_shader.bindUniform("projection", pvm);
 
-	aie::Gizmos::draw(projection * view);
+	m_shader.bind();
+
+	// bind light
+	m_shader.bindUniform("Ia", m_ambientLight);
+	m_shader.bindUniform("Id", m_light.diffuse);
+	m_shader.bindUniform("Is", m_light.specular);
+	m_shader.bindUniform("LightDirection", m_light.direction);
+
+	m_shader.bindUniform("cameraPosition", vec3(glm::inverse(view)[3]));
+
+	m_gridTexture.bind(0);
+
+	m_quadMesh.draw();
 
 	
+
+
+	aie::Gizmos::draw(projection * view);
+	
+	// drawing bunny
+	auto pvn = projection * view * m_bunnyTransform;
+	m_shader.bindUniform("projection", pvn);
+
+	// bind transforms for lighting 
+	m_shader.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_bunnyTransform)));
+
+	m_bunnyMesh.draw();
+
+	// draw Spear
+	auto ppm = projection * view * m_spearTransform;
+	m_shader.bindUniform("projection", ppm);
+
+	// bind transforms for lighting 
+	m_shader.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_spearTransform)));
+
+	m_spearMesh.draw();
+
+	
+
+	// bind transform
+	auto ppp = projection * view * m_quadTransform;
+	m_shader.bindUniform("projection", ppp);
+
+	// bind transform for lighting 
+	m_shader.bindUniform("NormalMatrix", glm::inverseTranspose(glm::mat3(m_quadTransform)));
+
+	m_quadMesh.draw();
 
 }
 
