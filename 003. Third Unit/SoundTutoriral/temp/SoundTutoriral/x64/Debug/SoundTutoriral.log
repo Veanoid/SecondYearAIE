@@ -1,0 +1,8 @@
+﻿  SoundTutoriralApp.cpp
+c:\users\s172578\desktop\secondyearaie.git\trunk\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(41): warning C4778: 'printf' : unterminated format string '%\n'
+c:\users\s172578\desktop\secondyearaie.git\trunk\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(41): warning C4474: 'printf' : too many arguments passed for format string
+  c:\users\s172578\desktop\secondyearaie.git\trunk\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(41): note: placeholders and their parameters expect 1 variadic arguments, but 2 were provided
+c:\users\s172578\desktop\secondyearaie.git\trunk\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(121): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+  main.cpp
+  Generating Code...
+LINK : fatal error LNK1104: cannot open file 'bootstrap.lib'
