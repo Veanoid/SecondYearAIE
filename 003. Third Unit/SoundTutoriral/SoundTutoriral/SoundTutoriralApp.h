@@ -24,6 +24,8 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
+
+
 protected:
 
 	aie::Renderer2D* m_2dRenderer;
@@ -45,6 +47,8 @@ protected:
 	bool *isplaying = false;
 	bool *isPaused = false;
 	std::vector<std::string> playList;
+
+	float circle = 10;
 
 	int currentSong;
 
