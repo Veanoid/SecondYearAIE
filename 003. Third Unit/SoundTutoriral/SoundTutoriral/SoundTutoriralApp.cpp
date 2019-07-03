@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
+#define SPECTRUMSIZE 4096
+
 
 using glm::vec3;
 using glm::vec4;
@@ -72,37 +74,45 @@ void SoundTutoriralApp::shutdown() {
 	m_pfmodSystem->release();
 }
 
+static int test = 0;
+static int testCount = 0;
+
 void SoundTutoriralApp::update(float deltaTime)
 {
 
 	m_pfmodSystem->update();
 	pChannel->isPlaying(isplaying);
+	test++;
+	if (test >= 10)
+	{
+		test = 0;
+		testCount++;
+		printf("%i\n", testCount);
+		FMOD::DSP* fftDSP;
+		result = m_pfmodSystem->createDSPByType(FMOD_DSP_TYPE_FFT, &fftDSP);
+		if (pChannelGroup != nullptr)
+		{
+			result = pChannelGroup->addDSP(0 /* = Head of the DSP chain. */, fftDSP);
 
-	//FMOD::DSP* fftDSP; FMOD::ChannelGroup* channelGroup;
-	//result = LowlevelSystem->createDSPByType(FMOD_DSP_TYPE_FFT, &fftDSP);
+			// Now that the dsp is attached, we can access it
 
-	//result = channelGroup->addDSP(0 /* = Head of the DSP chain. */, fftDSP);
+			void* data;
+			unsigned int length;
+			result = fftDSP->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, &data, &length, 0, 0);
 
-	//// Now that the dsp is attached, we can access it
+			float soundSum = 0;
+			for (int i = 0; i < length - 1; i++)
+			{
+				soundSum += ((float*)data)[i];
+				printf("Sound Sum @%i = %f\n", i, soundSum);
+			}
+			printf("%f\n", circle);
+			circle = soundSum / length;
+			pChannelGroup->removeDSP(fftDSP);
+		}
 
-	//void* data;
-	//unsigned int length;
-	//result = fft->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, &data, &length, 0, 0);
-
-	//FMOD_DSP_PARAMETER_FFT *fft;
-	//fftdsp->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, (void **)&fft, 0, 0, 0));
-	//for (int channel = 0; channel < fft->numchannels; channel++)
-	//{
-	//	for (int bin = 0; bin < fft->length; bin++)
-	//	{
-	//		float val = fft->spectrum[channel][bin];
-	//	}
-	//}
-
-	float freq = pChannel->getCurrentSound(&pSound);
-	
-	circle = freq * 2;
-
+		//system("cls");
+	}
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 	if (*isplaying == false)
@@ -164,7 +174,7 @@ void SoundTutoriralApp::draw() {
 
 	m_2dRenderer->setRenderColour(1,1,1,1);
 	m_2dRenderer->drawText(m_font, std::to_string(currentSong).c_str(), 100, 100);
-	m_2dRenderer->drawCircle(640, 360, circle);
+	m_2dRenderer->drawCircle(640, 360, 0.5f + circle);
 	//m_2dRenderer->drawSprite(PlayButton, 100.0f, 100.0f, 10, 10, 0, 0, 0, 0);
 
 	m_2dRenderer->end();

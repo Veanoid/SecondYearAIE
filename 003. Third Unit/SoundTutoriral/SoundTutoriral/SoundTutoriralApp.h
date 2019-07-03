@@ -35,7 +35,7 @@ protected:
 	FMOD::Sound* pSound = nullptr;
 	FMOD::Channel* pChannel;
 	FMOD_RESULT result;
-	FMOD::ChannelGroup* pChannelGroup;
+	FMOD::ChannelGroup* pChannelGroup = nullptr;
 
 	FMOD_VECTOR position = { 0,0,0 };
 	FMOD_VECTOR velocity = { 0,0,0 };
