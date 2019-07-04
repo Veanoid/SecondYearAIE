@@ -36,6 +36,7 @@ protected:
 	FMOD::Channel* pChannel;
 	FMOD_RESULT result;
 	FMOD::ChannelGroup* pChannelGroup = nullptr;
+	FMOD::DSP* m_pDSP;
 
 	FMOD_VECTOR position = { 0,0,0 };
 	FMOD_VECTOR velocity = { 0,0,0 };
@@ -48,10 +49,10 @@ protected:
 	bool *isPaused = false;
 	std::vector<std::string> playList;
 
-	float circle = 10;
+	float spectrumData[2048];
+	float intensity = 10000;
 
 	int currentSong;
 
-	//aie::Texture PlayButton = aie::Texture("./playButton.png");
 };
 

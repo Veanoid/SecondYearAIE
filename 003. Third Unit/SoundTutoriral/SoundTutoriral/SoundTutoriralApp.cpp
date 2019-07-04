@@ -54,6 +54,7 @@ bool SoundTutoriralApp::startup() {
 		return false;
 	}
 
+	// adding songs in the playlist
 	playList.push_back("Pretending.mp3");
 	playList.push_back("Crouch Drive to the Blanc Castle.mp3");
 	playList.push_back("Unlike Pluto - Everything Black (feat. Mike Taylor) [Official Lyric Video].mp3");
@@ -61,6 +62,12 @@ bool SoundTutoriralApp::startup() {
 	playList.push_back("Warrior by Jaxson Gamble.mp3");
 
 	result = m_pfmodSystem->createChannelGroup("MyChannelGroup", &pChannelGroup);
+
+	// initializers the data listener 
+	m_pfmodSystem->createDSPByType(FMOD_DSP_TYPE_FFT, &m_pDSP);
+	m_pDSP->setParameterInt(FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HANNING);
+	m_pDSP->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, 1280 * 2);
+	pChannelGroup->addDSP(FMOD_CHANNELCONTROL_DSP_HEAD, m_pDSP);
 
 	return true;
 }
@@ -82,37 +89,20 @@ void SoundTutoriralApp::update(float deltaTime)
 
 	m_pfmodSystem->update();
 	pChannel->isPlaying(isplaying);
-	test++;
-	if (test >= 10)
+
+
+	// getting the data of the sound in current song
+	FMOD_DSP_PARAMETER_FFT* pFFT;
+	m_pDSP->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, (void **)&pFFT, 0, 0, 0);
+	if (pFFT && isplaying)
 	{
-		test = 0;
-		testCount++;
-		printf("%i\n", testCount);
-		FMOD::DSP* fftDSP;
-		result = m_pfmodSystem->createDSPByType(FMOD_DSP_TYPE_FFT, &fftDSP);
-		if (pChannelGroup != nullptr)
+		for (int bin = 0; bin < pFFT->length; bin++)
 		{
-			result = pChannelGroup->addDSP(0 /* = Head of the DSP chain. */, fftDSP);
-
-			// Now that the dsp is attached, we can access it
-
-			void* data;
-			unsigned int length;
-			result = fftDSP->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, &data, &length, 0, 0);
-
-			float soundSum = 0;
-			for (int i = 0; i < length - 1; i++)
-			{
-				soundSum += ((float*)data)[i];
-				printf("Sound Sum @%i = %f\n", i, soundSum);
-			}
-			printf("%f\n", circle);
-			circle = soundSum / length;
-			pChannelGroup->removeDSP(fftDSP);
+			float freq = pFFT->spectrum[0][bin];
+			spectrumData[bin] = freq * intensity;
 		}
-
-		//system("cls");
 	}
+
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 	if (*isplaying == false)
@@ -173,9 +163,11 @@ void SoundTutoriralApp::draw() {
 	m_2dRenderer->begin();
 
 	m_2dRenderer->setRenderColour(1,1,1,1);
-	m_2dRenderer->drawText(m_font, std::to_string(currentSong).c_str(), 100, 100);
-	m_2dRenderer->drawCircle(640, 360, 0.5f + circle);
-	//m_2dRenderer->drawSprite(PlayButton, 100.0f, 100.0f, 10, 10, 0, 0, 0, 0);
+	// printing out the data of the current song
+	for (int i = 0; i < 2048; i++)
+	{
+		m_2dRenderer->drawBox(i / 0.5f, 350, 6, spectrumData[i]);
+	}
 
 	m_2dRenderer->end();
 }

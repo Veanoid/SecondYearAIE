@@ -2,6 +2,5 @@
 c:\users\s172578\desktop\repo folder\secondyearaie\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(44): warning C4778: 'printf' : unterminated format string '%\n'
 c:\users\s172578\desktop\repo folder\secondyearaie\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(44): warning C4474: 'printf' : too many arguments passed for format string
   c:\users\s172578\desktop\repo folder\secondyearaie\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(44): note: placeholders and their parameters expect 1 variadic arguments, but 2 were provided
-c:\users\s172578\desktop\repo folder\secondyearaie\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(104): warning C4018: '<': signed/unsigned mismatch
-c:\users\s172578\desktop\repo folder\secondyearaie\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(125): warning C4018: '>=': signed/unsigned mismatch
+c:\users\s172578\desktop\repo folder\secondyearaie\003. third unit\soundtutoriral\soundtutoriral\soundtutoriralapp.cpp(142): warning C4018: '>=': signed/unsigned mismatch
   SoundTutoriral.vcxproj -> C:\Users\s172578\Desktop\Repo Folder\SecondYearAIE\003. Third Unit\SoundTutoriral\temp\SoundTutoriral\Win32\Debug\SoundTutoriral.exe
